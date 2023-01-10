@@ -73,6 +73,18 @@ class SPADEGenerator(BaseNetwork):
 
         return sw, sh
 
+    def shift_x(self, x):
+        div_fold = 8
+        t, n, w, h = x.size()
+
+        fold = n // div_fold
+        out = torch.zeros_like(x)
+
+        out[:-1, :fold, :, :] = x[1:, :fold, :, :]
+        out[1:, fold:2 * fold, :, :] = x[:-1, fold:2 * fold, :, :]
+
+        out[:, 2 * fold:, :, :] = x[:, 2 * fold:, :, :]
+
     def forward(self, input, z=None):
         seg = input
 
@@ -97,15 +109,22 @@ class SPADEGenerator(BaseNetwork):
            self.opt.num_upsampling_layers == 'most':
             x = self.up(x)
 
-        x = self.G_middle_1(x, seg)
+        x = self.G_middle_1(x, seg)  # [16, 1024, 16, 16]
 
-        x = self.up(x)
-        x = self.up_0(x, seg)
-        x = self.up(x)
-        x = self.up_1(x, seg)
-        x = self.up(x)
-        x = self.up_2(x, seg)
-        x = self.up(x)
+        x = self.up(x)  # [16, 1024, 32, 32]
+        x = self.shift_x(x)
+        x = self.up_0(x, seg)  # [16, 512, 32, 32]
+
+        x = self.up(x)  # [16, 512, 64, 64]
+        x = self.shift_x(x)
+        x = self.up_1(x, seg)  # [16, 256, 64, 64]
+
+        x = self.up(x)  # [16, 256, 128, 128]
+        x = self.shift_x(x)
+        x = self.up_2(x, seg)  # [16, 128, 128, 128]
+
+        x = self.up(x)  # [16, 128, 256, 256]
+        x = self.shift_x(x)
         x = self.up_3(x, seg)
 
         if self.opt.num_upsampling_layers == 'most':
@@ -122,7 +141,8 @@ class Pix2PixHDGenerator(BaseNetwork):
     @staticmethod
     def modify_commandline_options(parser, is_train):
         parser.add_argument('--resnet_n_downsample', type=int, default=4, help='number of downsampling layers in netG')
-        parser.add_argument('--resnet_n_blocks', type=int, default=9, help='number of residual blocks in the global generator network')
+        parser.add_argument('--resnet_n_blocks', type=int, default=9,
+                            help='number of residual blocks in the global generator network')
         parser.add_argument('--resnet_kernel_size', type=int, default=3,
                             help='kernel size of the resnet block')
         parser.add_argument('--resnet_initial_kernel_size', type=int, default=7,
