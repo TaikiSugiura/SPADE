@@ -115,22 +115,22 @@ class SPADEGenerator(BaseNetwork):
         x = self.G_middle_1(x, seg)
 
         x = self.up(x)
-        if self.opt.MSCA == True:
+        if self.opt.shift == True:
             x = self.shift_x(x)
         x = self.up_0(x, seg)
 
         x = self.up(x)
-        if self.opt.MSCA == True:
+        if self.opt.shift == True:
             x = self.shift_x(x)
         x = self.up_1(x, seg)
 
         x = self.up(x)
-        if self.opt.MSCA == True:
+        if self.opt.shift == True:
             x = self.shift_x(x)
         x = self.up_2(x, seg)
 
         x = self.final_up(x)
-        if self.opt.MSCA == True:
+        if self.opt.shift == True:
             x = self.shift_x(x)
         x = self.up_3(x, seg)
 
