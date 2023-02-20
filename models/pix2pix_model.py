@@ -30,7 +30,7 @@ class Pix2PixModel(torch.nn.Module):
                 opt.gan_mode, tensor=self.FloatTensor, opt=self.opt)
             self.criterionFeat = torch.nn.L1Loss()
             if not opt.no_vgg_loss:
-                self.criterionVGG = networks.VGGLoss(self.opt.gpu_ids)
+                self.criterionVGG = networks.VGGLoss([self.opt.gpu])
             if opt.use_vae:
                 self.KLDLoss = networks.KLDLoss()
 
@@ -248,4 +248,4 @@ class Pix2PixModel(torch.nn.Module):
         return eps.mul(std) + mu
 
     def use_gpu(self):
-        return len(self.opt.gpu_ids) > 0
+        return len([self.opt.gpu]) > 0

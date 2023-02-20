@@ -56,7 +56,7 @@ class SPADEGenerator(BaseNetwork):
         self.conv_img = nn.Conv2d(final_nc, 3, 3, padding=1)
 
         self.up = nn.Upsample(scale_factor=2)
-        self.final_up = nn.Upsample(size=224)
+        self.final_up = nn.Upsample(size=self.opt.crop_size)
 
     def compute_latent_vector_size(self, opt):
         if opt.num_upsampling_layers == 'normal':
